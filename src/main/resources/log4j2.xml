@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Configuration status="WARN">
+    <CustomLevels>
+        <CustomLevel name="SUCCESS" intLevel="350" />
+    </CustomLevels>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%highlight{[%d{yyyy-MM-dd HH:mm:ss,SSS}{GMT+0}] - %msg%n}{FATAL=bg_red black, ERROR=red, WARN=yellow, SUCCESS=green, INFO=white, DEBUG=green, TRACE=blue}" disableAnsi="false"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>
