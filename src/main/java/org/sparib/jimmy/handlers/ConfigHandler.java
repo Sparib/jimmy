@@ -28,7 +28,8 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class ConfigHandler extends ListenerAdapter {
-    private final Path defaultConfigPath = Paths.get("./src/main/resources/default_config.xml");
+    private final Path defaultConfigPath =
+            Paths.get("./src/main/resources/default_config.xml").toAbsolutePath().normalize();
     private final String resourcesPath = "./src/main/resources/";
     private final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -153,7 +154,7 @@ public class ConfigHandler extends ListenerAdapter {
 
     public void readRoleMenus() {
         List<File> guildFiles = new ArrayList<>();
-        Path guildPath = Paths.get(resourcesPath);
+        Path guildPath = Path.of(resourcesPath).toAbsolutePath().normalize();
 
         try (Stream<Path> temp = Files.walk(guildPath, 1)) {
             List<Path> files = new ArrayList<>();

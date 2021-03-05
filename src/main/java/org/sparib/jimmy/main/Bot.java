@@ -12,6 +12,7 @@ import org.sparib.jimmy.classes.Pingable;
 import org.sparib.jimmy.handlers.*;
 
 import javax.security.auth.login.LoginException;
+import java.net.URI;
 
 public class Bot {
     public static JDA client;
@@ -19,11 +20,11 @@ public class Bot {
     public static Id botToken = null;
 
     public static LogHandler logHandler = new LogHandler();
+    public static ErrorHandler errorHandler = new ErrorHandler();
     public static ConfigHandler configHandler = new ConfigHandler();
     public static CommandHandler commandHandler = new CommandHandler();
     public static MessageHandler messageHandler = new MessageHandler();
     public static ReactionHandler reactionHandler = new ReactionHandler();
-    public static ErrorHandler errorHandler = new ErrorHandler();
 
     public static void main(String[] args) throws LoginException {
         Dotenv dotenv = Dotenv.load();
@@ -54,15 +55,6 @@ public class Bot {
         botToken = new Id(client.getSelfUser().getId());
 
         logHandler.success("Login and Initialization Successful!");
-
-        TextChannel channel = client.getTextChannelById(697159933518676032L);
-        Pingable pingable = new Pingable("Thing", "tcp://localhost:10000/", 2000, Pingable.Type.TCP, channel);
-
-        try {
-            Thread.sleep(30000);
-        } catch (Exception ignored) {}
-
-        pingable.stopPing();
     }
 
     public static LogHandler getLogHandler() {
