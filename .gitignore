@@ -5,3 +5,8 @@
 
 # Idea Folders
 /.idea
+
+# Other files
+src/main/resources/*
+!src/main/resources/default_config.xml
+!src/main/resources/log4j2.xml
