@@ -87,7 +87,7 @@ public class PingableCmd extends Command {
                 return;
             }
 
-            TextChannel channel = null;
+            TextChannel channel;
             if (args[5].toLowerCase().matches("<#[0-9]{18}>")) {
                 String channelId = args[5].replace("<#", "").replace(">", "");
                 channel = Bot.client.getTextChannelById(channelId);
@@ -96,7 +96,6 @@ public class PingableCmd extends Command {
                 return;
             }
 
-            assert pingType != null;
             assert channel != null;
 
             Pingable pingable = new Pingable(args[1], args[2], pingTime, pingType, channel, message);

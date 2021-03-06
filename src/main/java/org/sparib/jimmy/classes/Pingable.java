@@ -44,15 +44,12 @@ public class Pingable {
                 failEmbed.setDescription("Failed to reach host for " + getFailTime() + " seconds.");
                 errorMessage.editMessage(failEmbed.build()).complete();
             }
-            Bot.logHandler.LOGGER.error(lastPingSuccess);
             lastPingSuccess = false;
         }
 
         @Override
-        public void onResponse(@NotNull Call call, @NotNull final Response response) throws IOException {
-            Bot.logHandler.LOGGER.info(lastPingSuccess);
+        public void onResponse(@NotNull Call call, @NotNull final Response response) {
             if (response.isSuccessful()) {
-                Bot.logHandler.success("Successfully pinged http");
                 if (!lastPingSuccess) {
                     successEmbed.setDescription("Reconnected after " + getFailTime() + " seconds.");
                     errorMessage.editMessage(successEmbed.build()).complete();
@@ -127,9 +124,6 @@ public class Pingable {
             } else {
                 this.tcpPort = 27015;
             }
-
-            Bot.logHandler.LOGGER.info("Address: " + this.tcpAddress);
-            Bot.logHandler.LOGGER.info("Port: " + this.tcpPort);
         }
     }
 
@@ -142,7 +136,6 @@ public class Pingable {
         // Sets up try for socket ping
         try (Socket ignored = new Socket(this.tcpAddress, this.tcpPort)) {
             // On: Connected
-            Bot.logHandler.LOGGER.info("Connected tcp");
             if (!this.lastPingSuccess) {
                 successEmbed.setDescription("Reconnected after " + getFailTime() + " seconds.");
                 errorMessage.editMessage(successEmbed.build()).complete();
@@ -151,23 +144,17 @@ public class Pingable {
             this.lastPingSuccess = true;
         } catch (ConnectException ce) {
             // On: Didn't Connect
-            Bot.logHandler.LOGGER.info("Didn't connect tcp");
             if (this.lastPingSuccess) {
                 this.failEmbed.setDescription("Failed to connect.");
-                Bot.logHandler.LOGGER.info("Set description");
                 this.channel.sendMessage(failEmbed.build()).queue(m -> errorMessage = m);
-                Bot.logHandler.LOGGER.info("Send and set error message");
             } else {
                 pingFailNumber++;
                 this.failEmbed.setDescription("Failed to connect for " + getFailTime() + " seconds.");
-                Bot.logHandler.LOGGER.info("Updated description");
                 errorMessage.editMessage(failEmbed.build()).complete();
-                Bot.logHandler.LOGGER.info("Edited error message");
             }
             this.lastPingSuccess = false;
         } catch (UnknownHostException uhe) {
             // On: Unknown Host
-            Bot.logHandler.LOGGER.info("Unknown host tcp");
             pingSchedule.cancel(true);
             MessageEmbed errorEmbed = new EmbedBuilder()
                     .setTitle("Error with `" + this.name + "`")
@@ -178,7 +165,6 @@ public class Pingable {
             this.channel.sendMessage(errorEmbed).complete();
         } catch (Exception e) {
             // On: Other Exception
-            Bot.logHandler.LOGGER.info("Other exception tcp");
             Bot.errorHandler.error(this.channel);
             Bot.errorHandler.printStackTrace(e);
         }
