@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import org.sparib.jimmy.classes.Command;
 import org.sparib.jimmy.classes.CommandType;
 import org.sparib.jimmy.classes.Pingable;
+import org.sparib.jimmy.classes.PingType;
 import org.sparib.jimmy.main.Bot;
 
 import java.awt.*;
@@ -77,9 +78,9 @@ public class PingableCmd extends Command {
                 sendErrorEmbed("Ping time not an int", message);
             }
 
-            Pingable.PingType pingType = null;
+            PingType pingType = null;
             try {
-                pingType = Pingable.PingType.valueOf(args[4]);
+                pingType = PingType.valueOf(args[4]);
             } catch (Exception ignored) {
                 sendErrorEmbed("Ping type not correct type", message);
             }
