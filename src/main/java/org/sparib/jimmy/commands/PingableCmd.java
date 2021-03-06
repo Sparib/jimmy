@@ -54,9 +54,10 @@ public class PingableCmd extends Command {
         if (commandType.equals(CommandType.CREATE)) {
             List<Pingable> pingables = null;
             for (long serverId : pingablesPerServer.keySet()) {
-                if (serverId != message.getIdLong()) { continue; }
-                pingables = pingablesPerServer.get(serverId);
-                break;
+                if (serverId == message.getIdLong()) {
+                    pingables = pingablesPerServer.get(serverId);
+                    break;
+                }
             }
 
             if (pingables == null) { pingables = new ArrayList<>(); }
@@ -102,9 +103,27 @@ public class PingableCmd extends Command {
 
             pingables.add(pingable);
 
-            pingablesPerServer.put(message.getIdLong(), pingables);
+            pingablesPerServer.put(message.getGuild().getIdLong(), pingables);
 
             pingable.startPing();
+        } else if (commandType.equals(CommandType.DELETE)) {
+            long serverId = message.getGuild().getIdLong();
+            List<Pingable> pingables = pingablesPerServer.get(serverId);
+
+            boolean exists = false;
+            for (Pingable pg : pingables) {
+                if (pg.getName().equalsIgnoreCase(args[1])) {
+                    pg.stopPing();
+                    pg.removeMessage();
+                    pingables.remove(pg);
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists) {
+                sendErrorEmbed("Pingable does not exist", message);
+            }
         }
     }
 

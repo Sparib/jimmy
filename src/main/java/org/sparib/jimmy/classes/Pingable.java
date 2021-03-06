@@ -188,6 +188,18 @@ public class Pingable {
         }
     }
 
+    // Gets name
+    public String getName() {
+        return this.name;
+    }
+
+    // Removes latest error message if it is currently not connected
+    public void removeMessage() {
+        if (!lastPingSuccess) {
+            errorMessage.delete().queue();
+        }
+    }
+
     // Calculates time disconnected based on number of failed pings and time between pings
     private int getFailTime() {
         return (this.pingTime * this.pingFailNumber) / 1000;
