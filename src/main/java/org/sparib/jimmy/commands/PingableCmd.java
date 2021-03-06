@@ -76,6 +76,7 @@ public class PingableCmd extends Command {
                 pingTime = Integer.parseInt(args[3]);
             } catch (Exception ignored) {
                 sendErrorEmbed("Ping time not an int", message);
+                return;
             }
 
             PingType pingType = null;
@@ -83,12 +84,16 @@ public class PingableCmd extends Command {
                 pingType = PingType.valueOf(args[4]);
             } catch (Exception ignored) {
                 sendErrorEmbed("Ping type not correct type", message);
+                return;
             }
 
             TextChannel channel = null;
-            if (args[5].toLowerCase().matches("<#[0-9]{15}>")) {
+            if (args[5].toLowerCase().matches("<#[0-9]{18}>")) {
                 String channelId = args[5].replace("<#", "").replace(">", "");
                 channel = Bot.client.getTextChannelById(channelId);
+            } else {
+                sendErrorEmbed("Channel input is not a channel", message);
+                return;
             }
 
             assert pingType != null;
@@ -99,6 +104,8 @@ public class PingableCmd extends Command {
             pingables.add(pingable);
 
             pingablesPerServer.put(message.getIdLong(), pingables);
+
+            pingable.startPing();
         }
     }
 

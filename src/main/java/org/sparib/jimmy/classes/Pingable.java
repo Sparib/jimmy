@@ -50,10 +50,11 @@ public class Pingable {
 
         @Override
         public void onResponse(@NotNull Call call, @NotNull final Response response) throws IOException {
+            Bot.logHandler.LOGGER.info(lastPingSuccess);
             if (response.isSuccessful()) {
                 Bot.logHandler.success("Successfully pinged http");
                 if (!lastPingSuccess) {
-                    successEmbed.setDescription("Reconnected after " + getFailTime() + "seconds.");
+                    successEmbed.setDescription("Reconnected after " + getFailTime() + " seconds.");
                     errorMessage.editMessage(successEmbed.build()).complete();
                     pingFailNumber = 0;
                 }
@@ -69,7 +70,6 @@ public class Pingable {
                 }
                 lastPingSuccess = false;
             }
-            Bot.logHandler.LOGGER.error(lastPingSuccess);
         }
     };
 
@@ -135,7 +135,7 @@ public class Pingable {
 
     private void ping() {
         // Creates a new request with callback
-        client.newCall(request).enqueue(callback);
+        this.client.newCall(this.request).enqueue(this.callback);
     }
 
     private void pingTcp() {
@@ -154,11 +154,15 @@ public class Pingable {
             Bot.logHandler.LOGGER.info("Didn't connect tcp");
             if (this.lastPingSuccess) {
                 this.failEmbed.setDescription("Failed to connect.");
+                Bot.logHandler.LOGGER.info("Set description");
                 this.channel.sendMessage(failEmbed.build()).queue(m -> errorMessage = m);
+                Bot.logHandler.LOGGER.info("Send and set error message");
             } else {
                 pingFailNumber++;
                 this.failEmbed.setDescription("Failed to connect for " + getFailTime() + " seconds.");
+                Bot.logHandler.LOGGER.info("Updated description");
                 errorMessage.editMessage(failEmbed.build()).complete();
+                Bot.logHandler.LOGGER.info("Edited error message");
             }
             this.lastPingSuccess = false;
         } catch (UnknownHostException uhe) {
