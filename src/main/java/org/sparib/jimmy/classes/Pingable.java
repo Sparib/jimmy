@@ -4,8 +4,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.internal.entities.UserById;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import org.sparib.jimmy.main.Bot;
@@ -21,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Pingable {
     private String name;                        // Name of ping for use in embeds sent
+    private PingType pingType;                          // Type of ping
     private String tcpAddress = null;           // Address for tcp
     private int tcpPort = 0;                    // Port for tcp
     private final TextChannel channel;          // Channel to send updates in
@@ -74,9 +73,10 @@ public class Pingable {
         }
     };
 
-    public Pingable(String name, String url, int pingTime, Type type, TextChannel channel, Message message) {
+    public Pingable(String name, String url, int pingTime, PingType pingType, TextChannel channel, Message message) {
         // Setting of globals
         this.name = name;
+        this.pingType = pingType;
         this.channel = channel;
         this.pingTime = pingTime;
 
@@ -89,22 +89,14 @@ public class Pingable {
                 .setTitle(String.format("`%s` has failed!", this.name))
                 .setColor(Color.RED);
 
-        // Set up of actual pinging based on selected connection type
-        if (type.equals(Type.HTTP)) {
+        // Set up of actual pinging based on selected connection pingType
+        if (pingType.equals(PingType.HTTP)) {
             // Builds client and request
             client = new OkHttpClient();
             request = new Request.Builder()
                     .url(url)
                     .build();
-
-            // Schedules ping
-            ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-            pingSchedule = executorService.scheduleAtFixedRate(
-                    this::ping,
-                    0,
-                    pingTime,
-                    TimeUnit.MILLISECONDS);
-        } else if (type.equals(Type.TCP)) {
+        } else if (pingType.equals(PingType.TCP)) {
             // Checks if input is url/ip
             if (!url.matches("([0-9]{1,3}\\.){3}[0-9]{1,3}(:[0-9]{1,5})?") &&
                     !url.matches("localhost:[0-9]{1,5}")) {
@@ -136,16 +128,8 @@ public class Pingable {
                 this.tcpPort = 27015;
             }
 
-            Bot.logHandler.LOGGER.info(String.format("Address: %s\nPort: %s", this.tcpAddress, this.tcpPort));
-
-            // Schedules ping
-            ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
-            pingSchedule = executorService.scheduleAtFixedRate(
-                    this::pingTcp,
-                    0,
-                    pingTime,
-                    TimeUnit.MILLISECONDS
-            );
+            Bot.logHandler.LOGGER.info("Address: " + this.tcpAddress);
+            Bot.logHandler.LOGGER.info("Port: " + this.tcpPort);
         }
     }
 
@@ -196,6 +180,17 @@ public class Pingable {
         }
     }
 
+    public void startPing() {
+        Runnable pingRun = this.pingType == PingType.HTTP ? this::ping : this::pingTcp;
+        // Schedules and starts ping
+        ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+        pingSchedule = executorService.scheduleAtFixedRate(
+                pingRun,
+                0,
+                pingTime,
+                TimeUnit.MILLISECONDS);
+    }
+
     // Stops ping manually
     public void stopPing() {
         if (!pingSchedule.isCancelled()) {
@@ -206,11 +201,5 @@ public class Pingable {
     // Calculates time disconnected based on number of failed pings and time between pings
     private int getFailTime() {
         return (this.pingTime * this.pingFailNumber) / 1000;
-    }
-
-    // Type of connection
-    public enum Type {
-        TCP,
-        HTTP
     }
 }
