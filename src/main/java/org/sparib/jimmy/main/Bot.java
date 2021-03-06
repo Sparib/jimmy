@@ -4,6 +4,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
@@ -12,6 +13,9 @@ import org.sparib.jimmy.classes.Pingable;
 import org.sparib.jimmy.handlers.*;
 
 import javax.security.auth.login.LoginException;
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.Socket;
 import java.net.URI;
 
 public class Bot {
