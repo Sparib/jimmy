@@ -6,30 +6,69 @@ import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEve
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemoveEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+import org.sparib.jimmy.classes.Pingable;
 import org.sparib.jimmy.main.Bot;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.Objects;
 
 public class ReactionHandler extends ListenerAdapter {
-    private final Map<String, Map<String, Role>> messages = new HashMap<>();
+    private final Map<String, Map<String, Role>> roleMessages = new HashMap<>();
+    private final Map<Message, List<MessageEmbed>> pageMessages = new HashMap<>();
 
     @Override
     public void onGuildMessageReactionAdd(@NotNull GuildMessageReactionAddEvent event) {
         if (event.getUser() == Bot.client.getSelfUser()) { return; }
         String messageId = event.getMessageId();
 
-        if (!messages.containsKey(messageId)) { return; }
+        if (roleMessages.containsKey(messageId)) {
+            String emoji = event.getReactionEmote().getName();
 
-        String emoji = event.getReactionEmote().getName();
+            if (!roleMessages.get(messageId).containsKey(emoji)) {
+                return;
+            }
 
-        if (!messages.get(messageId).containsKey(emoji)) { return; }
+            Role role = roleMessages.get(messageId).get(emoji);
+            Guild guild = event.getGuild();
 
-        Role role = messages.get(messageId).get(emoji);
-        Guild guild = event.getGuild();
+            guild.addRoleToMember(event.getMember(), role).queue();
+        } else {
+            boolean isPageMessage = false;
+            Message message = null;
+            for (Message msg : pageMessages.keySet()) {
+                if (msg.getId().equalsIgnoreCase(messageId)) {
+                    isPageMessage = true;
+                    message = msg;
+                    break;
+                }
+            }
 
-        guild.addRoleToMember(event.getMember(), role).queue();
+            if (isPageMessage) {
+                if (!event.getUser().equals(Bot.client.getUserById(Bot.sparibToken.getId()))) { return; }
+
+                List<MessageEmbed> pages = pageMessages.get(message);
+
+                for (int i = 0; i < pages.size(); i++) {
+                    MessageEmbed embed = pages.get(i);
+                    if (Objects.equals(message.getEmbeds().get(message.getEmbeds().size() - 1).getTitle(), embed.getTitle())) {
+                        Bot.logHandler.LOGGER.info(i);
+                        Bot.logHandler.LOGGER.info(message.getEmbeds().get(0).getTitle());
+                        Bot.logHandler.LOGGER.info(embed.getTitle());
+                        if (event.getReaction().getReactionEmote().getName().equals("➡️")) {
+                            if (i == pages.size() - 1) { return; }
+                            message.editMessage(pages.get(i + 1)).complete();
+                        } else if (event.getReaction().getReactionEmote().getName().equals("⬅️")) {
+                            if (i == 0) { return; }
+                            message.editMessage(pages.get(i - 1)).complete();
+                        }
+                    }
+                }
+
+                pageMessages.put(message, pages);
+            }
+        }
     }
 
     @Override
@@ -37,13 +76,13 @@ public class ReactionHandler extends ListenerAdapter {
         if (event.getUser() == Bot.client.getSelfUser()) { return; }
         String messageId = event.getMessageId();
 
-        if (!messages.containsKey(messageId)) { return; }
+        if (!roleMessages.containsKey(messageId)) { return; }
 
         String emoji = event.getReactionEmote().getName();
 
-        if (!messages.get(messageId).containsKey(emoji)) { return; }
+        if (!roleMessages.get(messageId).containsKey(emoji)) { return; }
 
-        Role role = messages.get(messageId).get(emoji);
+        Role role = roleMessages.get(messageId).get(emoji);
         Guild guild = event.getGuild();
 
         if (event.getMember() == null) {
@@ -57,16 +96,23 @@ public class ReactionHandler extends ListenerAdapter {
     public void onMessageDelete(MessageDeleteEvent event) {
         String eventId = event.getMessageId();
 
-        for (String messageId : messages.keySet()) {
+        for (String messageId : roleMessages.keySet()) {
             if (eventId.equals(messageId)) {
                 Bot.configHandler.removeRoleMenu(event.getGuild().getId(), event.getChannel().getId(), messageId);
-                messages.remove(messageId);
+                roleMessages.remove(messageId);
                 break;
             }
         }
     }
 
     public void addReactionMessage(String messageId, Map<String, Role> roleStringMap) {
-        messages.put(messageId, roleStringMap);
+        roleMessages.put(messageId, roleStringMap);
+    }
+
+    public void addPageMessage(Message message, List<MessageEmbed> messageEmbeds) {
+        pageMessages.put(message, messageEmbeds);
+
+        message.addReaction("⬅️").queue();
+        message.addReaction("➡️").queue();
     }
 }

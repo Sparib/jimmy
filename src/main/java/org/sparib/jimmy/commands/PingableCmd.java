@@ -124,6 +124,31 @@ public class PingableCmd extends Command {
             if (!exists) {
                 sendErrorEmbed("Pingable does not exist", message);
             }
+        } else if (commandType.equals(CommandType.LIST)) {
+            List<Pingable> pingables = pingablesPerServer.get(message.getGuild().getIdLong());
+
+            if (pingables == null) {
+                sendErrorEmbed("No Pingables on this server", message);
+                return;
+            }
+
+            final List<MessageEmbed> pages = new ArrayList<>();
+            for (Pingable pingable : pingables) {
+                MessageEmbed embed = new EmbedBuilder()
+                        .setTitle(codeBlock(pingable.getName()))
+                        .addField("URL", codeBlock(pingable.getUrl()), false)
+                        .addField("Ping Time (ms)", codeBlock(pingable.getPingTime()), false)
+                        .addField("Ping Type", codeBlock(pingable.getPingType()), false)
+                        .addField("Channel", codeBlock(pingable.getChannel()), false)
+                        .setColor(Color.BLUE)
+                        .setTimestamp(Instant.now())
+                        .setFooter("Command issued by " + message.getAuthor().getAsTag())
+                        .build();
+
+                pages.add(embed);
+            }
+
+
         }
     }
 
@@ -144,6 +169,10 @@ public class PingableCmd extends Command {
         }
 
         return createCorrect || deleteCorrect || listCorrect;
+    }
+
+    private String codeBlock(String s) {
+        return String.format("`%s`", s);
     }
 
     private void sendErrorEmbed(String reason, Message message) {

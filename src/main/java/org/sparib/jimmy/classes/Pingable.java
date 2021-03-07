@@ -18,8 +18,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 public class Pingable {
-    private String name;                        // Name of ping for use in embeds sent
-    private PingType pingType;                          // Type of ping
+    private final String name;                  // Name of ping for use in embeds sent
+    private final PingType pingType;            // Type of ping
+    private final String url;                   // Url to ping (for listing)
     private String tcpAddress = null;           // Address for tcp
     private int tcpPort = 0;                    // Port for tcp
     private final TextChannel channel;          // Channel to send updates in
@@ -73,6 +74,7 @@ public class Pingable {
     public Pingable(String name, String url, int pingTime, PingType pingType, TextChannel channel, Message message) {
         // Setting of globals
         this.name = name;
+        this.url = url;
         this.pingType = pingType;
         this.channel = channel;
         this.pingTime = pingTime;
@@ -188,9 +190,29 @@ public class Pingable {
         }
     }
 
-    // Gets name
+    // Returns name
     public String getName() {
         return this.name;
+    }
+
+    // Returns url
+    public String getUrl() {
+        return this.url;
+    }
+
+    // Returns ping time
+    public String getPingTime() {
+        return "" + this.pingTime;
+    }
+
+    // Returns ping type
+    public String getPingType() {
+        return this.pingType.toString();
+    }
+
+    // Returns channel
+    public String getChannel() {
+        return this.channel.getAsMention();
     }
 
     // Removes latest error message if it is currently not connected
