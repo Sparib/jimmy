@@ -56,10 +56,10 @@ public class ReactionHandler extends ListenerAdapter {
                         Bot.logHandler.LOGGER.info(i);
                         Bot.logHandler.LOGGER.info(message.getEmbeds().get(0).getTitle());
                         Bot.logHandler.LOGGER.info(embed.getTitle());
-                        if (event.getReaction().getReactionEmote().getName().equals("➡️")) {
+                        if (event.getReaction().getReactionEmote().getName().equals("\u2B05\uFE0F")) {
                             if (i == pages.size() - 1) { return; }
                             message.editMessage(pages.get(i + 1)).complete();
-                        } else if (event.getReaction().getReactionEmote().getName().equals("⬅️")) {
+                        } else if (event.getReaction().getReactionEmote().getName().equals("\u27A1\uFE0F")) {
                             if (i == 0) { return; }
                             message.editMessage(pages.get(i - 1)).complete();
                         }
@@ -112,7 +112,7 @@ public class ReactionHandler extends ListenerAdapter {
     public void addPageMessage(Message message, List<MessageEmbed> messageEmbeds) {
         pageMessages.put(message, messageEmbeds);
 
-        message.addReaction("⬅️").queue();
-        message.addReaction("➡️").queue();
+        message.addReaction("\u2B05\uFE0F").queue();
+        message.addReaction("\u27A1\uFE0F").queue();
     }
 }
