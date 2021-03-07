@@ -8,6 +8,7 @@
 /.idea
 
 # Other files
+/temp
 src/main/resources/*
 !src/main/resources/default_config.xml
 !src/main/resources/log4j2.xml
